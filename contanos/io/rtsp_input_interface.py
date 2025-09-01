@@ -87,7 +87,7 @@ class RTSPInput(ABC):
                                 frame_id_str = bytes(side_data).decode('ascii', 'ignore')
                     
                     # Convert to BGR numpy array
-                    frame_np = frame.to_ndarray(format='bgr24')
+                    frame_np = frame.to_ndarray(format='rgb24')
                     
                     metadata = {
                         'frame_id_str': frame_id_str,
