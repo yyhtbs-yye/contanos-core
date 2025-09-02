@@ -88,7 +88,12 @@ Permission is hereby granted, free of charge, to any person obtaining a copy...
 
 ## Contributing and Contact Info
 
-Contributions to Contanos are welcome! If you have ideas for improvements, find a bug, or want to add new features (such as support for additional input/output types or new example modules), please consider contributing:
+Contributions are welcome! Bug reports, feature requests, and pull requests help improve STRIDE.
+
+Issues: open an issue with details and repro steps.
+Pull requests: keep changes focused; include concise docs and tests where appropriate.
+Style: follow the existing structure and env‑var conventions (IN_*, OUT_*, DEVICES, etc.).
+Contact: open an issue, or reach out to the maintainer on GitHub (yyhtbs-yye).
 
 
 ## Acknowledgement
