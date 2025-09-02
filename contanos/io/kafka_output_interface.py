@@ -24,8 +24,6 @@ class KafkaOutput(ABC):
       - acks: 0 | 1 | "all" (default "all")
       - linger_ms: int (default 0)
       - compression_type: "gzip" | "snappy" | "lz4" | "zstd" | None
-      - retries: int (default per aiokafka)
-      - batch_size: int
       - max_request_size: int
 
       # Security (optional)
@@ -57,14 +55,12 @@ class KafkaOutput(ABC):
 
         # Kafka producer config
         self.acks = config.get("acks", "all")
-        self.linger_ms = config.get("linger_ms")
+        self.linger_ms = config.get("linger_ms", 0)
         self.compression_type = config.get("compression_type")
-        self.retries = config.get("retries")
-        self.batch_size = config.get("batch_size")
-        self.max_request_size = config.get("max_request_size")
+        self.max_request_size = config.get("max_request_size", 1048576)
 
         # Security
-        self.security_protocol = config.get("security_protocol")
+        self.security_protocol = config.get("security_protocol", 'PLAINTEXT')
         self.sasl_mechanism = config.get("sasl_mechanism")
         self.username = config.get("username")
         self.password = config.get("password")
@@ -96,8 +92,6 @@ class KafkaOutput(ABC):
                 acks=self.acks,
                 linger_ms=self.linger_ms,
                 compression_type=self.compression_type,
-                retries=self.retries,
-                batch_size=self.batch_size,
                 max_request_size=self.max_request_size,
                 security_protocol=self.security_protocol,
                 sasl_mechanism=self.sasl_mechanism,

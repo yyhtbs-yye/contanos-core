@@ -33,6 +33,24 @@ class KafkaInput(ABC):
 
     def __init__(self, config: Dict[str, Any]):
         super().__init__()
+        # ---- helpers to sanitize config values ----
+        def _as_int(v: Any, default: Optional[int] = None) -> Optional[int]:
+            if v is None:
+                return default
+            if isinstance(v, (int,)) and not isinstance(v, bool):
+                return v
+            s = str(v).strip()
+            if s == "" or s.lower() == "none":
+                return default
+            return int(s)
+        def _as_bool(v: Any, default: bool) -> bool:
+            if v is None:
+                return default
+            if isinstance(v, bool):
+                return v
+            return str(v).strip().lower() in {"1", "true", "yes", "on"}
+
+
         self.addr: str = config["addr"]
         proto, rest = self.addr.split("://", 1)
         if proto != "kafka":
@@ -55,15 +73,16 @@ class KafkaInput(ABC):
         self.client_id = f"{base_id}_{unique_suffix}"
 
         self.auto_offset_reset = config.get("auto_offset_reset", "latest")
-        self.enable_auto_commit = bool(config.get("enable_auto_commit", True))
+        self.enable_auto_commit = _as_bool(config.get("enable_auto_commit"), True)
 
         # Asyncio constructs
-        self.message_queue: Queue = Queue(maxsize=int(config.get("max_queue", 100)))
+        self.message_queue: Queue = Queue(maxsize=_as_int(config.get("max_queue"), 100))
+
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._consumer_task: Optional[asyncio.Task] = None
 
         # Security (all optional)
-        self.security_protocol = config.get("security_protocol")  # None -> defaults to PLAINTEXT in aiokafka
+        self.security_protocol = config.get("security_protocol", 'PLAINTEXT')  # None -> defaults to PLAINTEXT in aiokafka
         self.sasl_mechanism = config.get("sasl_mechanism")
         self.username = config.get("username")
         self.password = config.get("password")
@@ -72,8 +91,8 @@ class KafkaInput(ABC):
         self.ssl_keyfile = config.get("ssl_keyfile")
 
         # Perf tuning (optional)
-        self.fetch_max_bytes = config.get("fetch_max_bytes")
-        self.max_partition_fetch_bytes = config.get("max_partition_fetch_bytes")
+        self.fetch_max_bytes = _as_int(config.get("fetch_max_bytes"))
+        self.max_partition_fetch_bytes = _as_int(config.get("max_partition_fetch_bytes"))
 
         self.consumer: Optional[AIOKafkaConsumer] = None
         self.is_running = False
@@ -91,8 +110,8 @@ class KafkaInput(ABC):
                     keyfile=self.ssl_keyfile,
                 )
 
-            self.consumer = AIOKafkaConsumer(
-                *self.topics,
+            # Build kwargs and only include optional ints if present
+            consumer_kwargs = dict(
                 bootstrap_servers=self.bootstrap_servers,
                 group_id=self.group_id,
                 client_id=self.client_id,
@@ -103,17 +122,28 @@ class KafkaInput(ABC):
                 sasl_plain_username=self.username,
                 sasl_plain_password=self.password,
                 ssl_context=ssl_context,
-                fetch_max_bytes=self.fetch_max_bytes,
-                max_partition_fetch_bytes=self.max_partition_fetch_bytes,
+                # Optionally: api_version="auto",
             )
+            if self.fetch_max_bytes is not None:
+                consumer_kwargs["fetch_max_bytes"] = self.fetch_max_bytes
+            if self.max_partition_fetch_bytes is not None:
+                consumer_kwargs["max_partition_fetch_bytes"] = self.max_partition_fetch_bytes
+
+            self.consumer = AIOKafkaConsumer(*self.topics, **consumer_kwargs)
 
             await self.consumer.start()
             self.is_running = True
             logging.info(
-                f"Kafka consumer started: servers={self.bootstrap_servers}, "
-                f"topics={self.topics}, group={self.group_id}, client_id={self.client_id}"
+                "Kafka consumer started",
+                extra={
+                    "servers": self.bootstrap_servers,
+                    "topics": self.topics,
+                    "group": self.group_id,
+                    "client_id": self.client_id,
+                    "fetch_max_bytes": self.fetch_max_bytes,
+                    "max_partition_fetch_bytes": self.max_partition_fetch_bytes,
+                },
             )
-
             # Background consumer task
             self._consumer_task = asyncio.create_task(self._consume_loop(), name=f"kafka_consume_{self.client_id}")
             return True
