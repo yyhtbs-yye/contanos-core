@@ -90,18 +90,12 @@ Permission is hereby granted, free of charge, to any person obtaining a copy...
 
 Contributions are welcome! Bug reports, feature requests, and pull requests help improve STRIDE.
 
-Issues: open an issue with details and repro steps.
-Pull requests: keep changes focused; include concise docs and tests where appropriate.
-Style: follow the existing structure and env‑var conventions (IN_*, OUT_*, DEVICES, etc.).
-Contact: open an issue, or reach out to the maintainer on GitHub (yyhtbs-yye).
-
-
-## Acknowledgement
-This work has received funding as an Open Call project under the aerOS project (”Autonomous, scalablE, tRustworthy, intelligent European meta Operating System for the IoT edgecloud continuum”), funded by the European Union’s Horizon Europe programme under grant agreement No. 101069732.
-
-
 - **Submit Issues**: If you encounter any problems or have questions, please open an issue on the GitHub repository. This helps track known issues and discussions.
 - **Pull Requests**: Feel free to fork the repository and submit pull requests. Whether it’s a bug fix, new feature, or improved documentation, we will review PRs and integrate them if they align with the project goals. Before starting large changes, it might be good to open an issue to discuss your plans.
 - **Project Style**: Try to follow the coding style of the project for consistency (PEP8 for Python code, and similar structure to existing modules if creating new ones). Write clear commit messages and document new code as needed.
 
-**Contact**: For any inquiries, you can reach out by opening an issue (which is actively monitored by the maintainer). If you need to contact the maintainer directly, you can find contact links on the maintainer’s GitHub profile (`yyhtbs-yye` on GitHub).
+Contact: open an issue, or reach out to the maintainer on GitHub (yyhtbs-yye).
+
+## Acknowledgement
+This work has received funding as an Open Call project under the aerOS project (”Autonomous, scalablE, tRustworthy, intelligent European meta Operating System for the IoT edgecloud continuum”), funded by the European Union’s Horizon Europe programme under grant agreement No. 101069732.
+
