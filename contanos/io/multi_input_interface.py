@@ -70,8 +70,8 @@ class MultiInputInterface:
 
                     # If this frame is now complete
                     if len(self._data_dict[frame_id_str]) == self._num_interfaces:
-                        await self._queue.put(self._data_dict[frame_id_str])
-                        del self._data_dict[frame_id_str]
+                        item = self._data_dict.pop(frame_id_str)
+                        self._queue.put_nowait(item)
                         self._frame_id_order.remove(frame_id_str)
             
             except Exception as e:
@@ -86,6 +86,7 @@ class MultiInputInterface:
         try:
             # Get completed dictionary from queue
             frame_data = await self._queue.get()
+
             # Sort by interface_idx for consistent order
             # print(f"the current frame_id_str is: {frame_data[0][1]['frame_id_str']}")
             data_list = []
